@@ -1,0 +1,136 @@
+
+//buildscript {
+//    repositories {
+//        maven {
+//            url uri('../repo')
+//        }
+//    }
+//    dependencies {
+//        // NOTE: Do not place your application dependencies here; they belong
+//        // in the individual module build.gradle files
+//        classpath 'com.wx.packer:packer:1.0.0'
+//    }
+//}
+
+
+apply plugin: 'com.android.application'
+
+//apply plugin: 'packer'
+//////apply plugin: 'com.dorongold.task-tree'
+////
+//packer {
+//    product "NICK"
+//    version {
+//        type "prop"
+//    }
+//
+//    output {
+//        renameOutput true
+//    }
+//}
+def tag
+if(tag == null || tag.equals("")){
+    println("empty tag")
+}else{
+    println("tag ok"+tag)
+}
+
+android {
+    compileSdkVersion 25
+//    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.wx.packer"
+        minSdkVersion 21
+        targetSdkVersion 25
+        //versionCode 1
+        //versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        println("andeoirf dfall--111")
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+//    productFlavors {
+//        V101 {
+//            versionName = "V101L02-V10R102C02"
+//        }
+//        Generic {
+//            versionName = "1.0.1x"
+//        }
+//    }
+    android.applicationVariants.all
+    //applicationVariants.
+
+}
+
+
+
+
+android{
+
+    defaultConfig {
+        //versionName "3.1"
+        println("andeoirf dfall--1")
+    }
+
+    println("andeoirf dfall--2")
+}
+//tasks.getByName("assemble"){
+//    it.doLast{
+//        println("xxx $project.name")
+//    }
+//}
+
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    testCompile 'junit:junit:4.12'
+}
+
+//apply from:"version.gradle"
+//
+//packer {
+//    println("---packer---1")
+//    usefile true
+////    version{
+////        versionFile "/msdf/sdf"
+////    }
+//
+//    test "xins"
+//    println("---packer---2")
+//
+//
+//}
+
+
+
+project.afterEvaluate {
+
+    //project.android.defaultConfig.setVersionName(packer.version.versionName)
+    println("afterEvaluate=====================")
+
+    project.android.productFlavors.each {
+        println("-----------------")
+        println(it)
+        println(it.versionName)
+        it.versionName = "1.2..2.2.2"
+        println("-----------------")
+    }
+    project.android.applicationVariants.all {
+        println("-----zjm ++---------------")
+        println(it)
+        println it.name
+        println it.versionName
+        //it.versionName = "2.1.0"
+        println("-sss---"+project.android.defaultConfig.versionName)
+        println("-----zjm -----------------")
+    }
+}

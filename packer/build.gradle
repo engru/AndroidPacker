@@ -1,0 +1,26 @@
+apply plugin: 'groovy'
+
+
+dependencies {
+    compile localGroovy()
+    compile gradleApi()
+    compile 'com.android.tools.build:gradle:3.0.1'
+    compile 'com.android.tools.build:apksig:3.0.1'
+    //compile 'org.ajoberstar:grgit:3.3'
+}
+
+
+
+//apply plugin: 'maven'
+//group='com.wx.packer'
+//version='1.0.0'
+//
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            repository(url: uri('../repo'))
+//        }
+//    }
+//}
+
+apply from:"publish.gradle"

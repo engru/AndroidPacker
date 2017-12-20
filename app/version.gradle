@@ -1,0 +1,262 @@
+
+
+def getVersion(){
+    return "git rev-list HEAD ^`git describe` --count".execute().text.trim()
+}
+
+// 读取版本号
+def getVersionName() {
+    def versionFile = file('version.properties')
+    if (versionFile.canRead()){
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionFile))
+        def versionCode = versionProps['VERSION_CODE'].toInteger()
+        def runTasks = gradle.startParameter.taskNames
+        if ('assembleRelease' in runTasks) {
+            versionProps['VERSION_CODE'] = (++versionCode).toString()
+            versionProps.store(versionFile.newWriter(), null)
+        }
+        return versionCode
+    } else {
+        return "git rev-list HEAD --count".execute().text.trim()
+        //throw new GradleException("Could not find version.properties!")
+    }
+}
+
+
+
+
+class PackerExtension{
+
+    PackerVersion version
+    boolean usefile = false
+
+
+    PackerExtension() {
+        println("......packerextension construct----")
+        version = new PackerVersion()
+    }
+
+    def setTest(String test){
+        println("---settest---")
+
+    }
+
+    def getTest(){
+        println("---gettest---")
+        return "test"
+    }
+
+}
+
+class PackerVersion{
+
+    boolean enable = true
+
+    String name = "1.0";
+    int version = 1;
+    String branchName;
+    String shortBranch;
+    int branchVersion;
+    int localChanges;
+    String commit;
+
+    String meta
+}
+
+
+class HelloPlugin implements Plugin<Project>{
+    PackerExtension packer
+    PackerVersion gitversion
+    PackerVersion propversion
+
+
+    def gitVersionCode() {
+        def cmd = 'git rev-list HEAD --first-parent --count'
+        cmd.execute().text.trim().toInteger()
+    }
+
+    def gitVersionTag() {
+        def cmd = 'git describe --tags'
+        def version = cmd.execute().text.trim()
+
+        //def pattern = "-(\d+)-g"
+        def pattern = /-(\d+)-g/
+        def matcher = version =~ pattern
+
+        if (matcher) {
+            version = version.substring(0, matcher.start()) + "." + matcher[0][1]
+        } else {
+            version = version + ".0"
+        }
+
+        return version
+    }
+
+    def getVersionCode(){
+        return "git rev-list HEAD --count".execute().text.trim()
+
+    }
+
+    def getGitTag(){
+        return "git describe --tags".execute().text.trim()
+    }
+    @Override
+    void apply(Project project) {
+        packer = project.extensions.create("packer",PackerExtension)
+
+        project.task('testPlugin') << {
+            println 'hello, world!'
+        }
+
+
+        //if(packer.version.versionFile != null && !packer.version.versionFile.equals("")){
+//        if(packer.usefile){
+//            //
+//            println("version file not null ")
+//        }else{
+//
+//            checkingGitVersion()
+//        }
+
+        loadVersionInfo()
+
+        project.android.defaultConfig{
+            println("defaultconfig--1222")
+            if(gitversion.enable){
+                versionCode gitversion.version
+                versionName gitversion.name
+            }else{
+                versionCode propversion.version
+                versionName propversion.name
+            }
+        }
+
+        //project.android.defaultConfig.versionName = "3.2.6"
+
+        println("---versionname--"+project.android.defaultConfig.versionName)
+        println("---project---"+project.rootDir.absolutePath)
+
+        project.beforeEvaluate {
+            println("beforeEvaluate====================")
+
+        }
+
+        project.afterEvaluate {
+
+            //project.android.defaultConfig.setVersionName(packer.version.versionName)
+            println("afterEvaluate=====================")
+
+            project.android.productFlavors.each {
+                println("-----------------")
+                println(it)
+                println(it.versionName)
+                it.versionName = "1.2..2.2.2"
+                println("-----------------")
+            }
+            project.android.applicationVariants.all {
+                println("-----zjm ++---------------")
+                println(it)
+                println it.name
+                println it.versionName
+                //it.versionName = "2.1.0"
+                println("-sss---"+project.android.defaultConfig.versionName)
+                println("-----zjm -----------------")
+            }
+        }
+
+
+        project.configurations.all {
+            //println("configrations--"+it)
+
+
+        }
+
+        project.configure(project){
+            println("=======configure project")
+        }
+
+        project.configure(project.android){
+
+            println("=======configure project android")
+        }
+
+
+
+
+    }
+
+
+    def checkingGitVersion(){
+
+        def versioncode = getVersionCode()
+
+        println("versioncode---"+gitVersionCode())
+        println("versiontag---"+gitVersionTag())
+
+        ///packer.version.versionCode = versionCode
+        ///packer.version.versionName = getGitTag()
+    }
+
+
+    def loadVersionInfo(){
+        loadGitVersion()
+        loadPropVersion()
+    }
+
+
+    def loadGitVersion(){
+
+        gitversion = new PackerVersion()
+
+        gitversion.version = gitVersionCode()
+        gitversion.name = "git-"+gitVersionTag()
+
+        if(gitVersionCode() == null && gitVersionCode() == 0){
+            gitversion.enable = false
+        }
+
+    }
+
+
+    def loadPropVersion(){
+
+        def version = loadProperties()
+        propversion = new PackerVersion()
+        propversion.version = version
+        propversion.name = "1.0.2.1"+version
+
+    }
+
+    def loadProperties(){
+//        def versionFile = file('version.properties')
+//        if (versionFile.canRead()) {
+//            def Properties versionProps = new Properties()
+//            versionProps.load(new FileInputStream(versionFile))
+//            def versionCode = versionProps['VERSION_CODE'].toInteger()
+//            def runTasks = gradle.startParameter.taskNames
+//            if ('assembleRelease' in runTasks) {
+//                versionProps['VERSION_CODE'] = (++versionCode).toString()
+//                versionProps.store(versionFile.newWriter(), null)
+//            }
+//            return versionCode
+//        }
+        return 0
+    }
+}
+
+
+apply plugin: HelloPlugin
+
+
+gradle.beforeProject {
+    println("gradle beforeproject "+it)
+}
+
+gradle.taskGraph.whenReady {
+    println("gradle taskgraph ready ")
+}
+
+gradle.buildFinished {
+    println("gradle build finished")
+}

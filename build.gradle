@@ -1,0 +1,35 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        jcenter()
+        google()
+        maven {
+            url uri('repo')
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.0.1'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.5.2'
+//        classpath 'com.wx.packer:packer:1.0.0'
+        //classpath 'gradle.plugin.com.dorongold.plugins:task-tree:1.2.2'
+        //classpath 'cz.malohlava:visteg:1.0.0'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        google()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
