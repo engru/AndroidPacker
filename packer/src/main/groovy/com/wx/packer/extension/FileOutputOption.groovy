@@ -1,6 +1,7 @@
 package com.wx.packer.extension
 
 import com.android.build.gradle.api.BaseVariant
+import com.wx.packer.GradlePlugin
 import groovy.text.SimpleTemplateEngine
 import org.gradle.api.Project
 
@@ -46,17 +47,28 @@ class FileOutputOption {
 
         //println("iszipAnligen --"+variant.buildType.zipAlignEnabled)
 
-        variant.outputs.all { output ->
-            //println("outputfile --"+output.outputFile.name)
-            def oldfile = output.outputFile
+        def androidGradlePlugin = GradlePlugin.getAndroidPluginVersion(project)
 
-            if(variant.buildType.name.equals('release') && oldfile != null && oldfile.name.endsWith('.apk')) {
-                output.outputFile = new File(oldfile.parent, fileName + ".apk")
-                outputFileName = fileName + ".apk"
+        if (androidGradlePlugin != null && androidGradlePlugin.version.startsWith("3.")) {
+            variant.outputs.all { output ->
+                outputFileName = "${fileName}.apk"
             }
-
-            //println("outputfile new --"+output.outputFile.name)
-
+        } else {
+            variant.outputs.each { output ->
+                output.outputFile = new File(output.outputFile.parent, fileName + ".apk")
+            }
         }
+//        variant.outputs.all { output ->
+//            //println("outputfile --"+output.outputFile.name)
+//            def oldfile = output.outputFile
+//
+//            if(variant.buildType.name.equals('release') && oldfile != null && oldfile.name.endsWith('.apk')) {
+//                output.outputFile = new File(oldfile.parent, fileName + ".apk")
+//                outputFileName = fileName + ".apk"
+//            }
+//
+//            //println("outputfile new --"+output.outputFile.name)
+//
+//        }
     }
 }

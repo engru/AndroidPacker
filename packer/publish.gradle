@@ -2,7 +2,7 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
 def packageName = 'com.wx.build.gradle.packer'
-def libraryVersion = '1.0.4'
+def libraryVersion = '1.0.5'
 
 publishing {
     publications {

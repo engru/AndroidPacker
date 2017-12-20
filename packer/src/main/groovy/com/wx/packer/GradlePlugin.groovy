@@ -67,38 +67,6 @@ class GradlePlugin implements Plugin<Project> {
 
     }
 
-    void generateOutput(BaseVariant variant){
-        //println("---genenrate--output--")
-
-        def map = [
-                'appName'    : extension.product,
-                'projectName': project.rootProject.name,
-                'flavorName' : variant.flavorName,
-                'buildType'  : variant.buildType.name,
-                'versionName': variant.versionName,
-                'versionCode': variant.versionCode
-        ]
-
-        def defaultTemplate = !variant.flavorName.equals("") && variant.flavorName != null ?
-                '$appName-$flavorName-$buildType-$versionName' : '$appName-$buildType-$versionName'
-        def template = extension.output.na == null ? defaultTemplate : nameFormat
-        def fileName = templateEngine.createTemplate(template).make(map).toString();
-        if (variant.buildType.zipAlignEnabled) {
-            def file = variant.outputs[0].outputFile
-            variant.outputs[0].outputFile = new File(file.parent, fileName + ".apk")
-        }
-
-        def androidGradlePlugin = AdvancedBuildVersionPlugin.getAndroidPluginVersion(project)
-        if (androidGradlePlugin != null && androidGradlePlugin.version.equals("1.3.0")) {
-            // android gradle 1.3.0 bug: https://code.google.com/p/android/issues/detail?id=182248
-            project.getLogger().log(LogLevel.WARN, "could not make unaligned file. You should use android gradle 1.3.1 and above")
-            return;
-        }
-        def file = variant.outputs[0].packageApplication.outputFile
-        variant.outputs[0].packageApplication.outputFile =
-                new File(file.parent, fileName + "-unaligned.apk")
-    }
-
 
     void addTasks(BaseVariant vt) {
         debug("addTasks() for ${vt.name}")
@@ -127,5 +95,19 @@ class GradlePlugin implements Plugin<Project> {
 
     void debug(String msg) {
         project.logger.info(msg)
+    }
+
+    def static getAndroidPluginVersion(Project project) {
+        def projectGradle = findClassPathDependencyVersion(project, 'com.android.tools.build', 'gradle')
+        if (projectGradle == null) {
+            projectGradle = findClassPathDependencyVersion(project.getRootProject(), 'com.android.tools.build', 'gradle')
+        }
+        return projectGradle
+    }
+
+    def static findClassPathDependencyVersion(Project project, group, attributeId) {
+        return project.buildscript.configurations.classpath.dependencies.find {
+            it.group != null && it.group.equals(group) && it.name.equals(attributeId)
+        }
     }
 }
