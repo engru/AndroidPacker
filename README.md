@@ -39,7 +39,7 @@ packer{
     product "product_Name" //产品名称
     version{
         type "git" // 版本号来源方式 支持 git 和 prop 两种方式 
-                   // git 从git提交中获取版本号  prop 从build.gradle 中配置的versionCode 获取
+                   // git 从git提交中获取版本号  prop 从app根目录下的version.properties中配置的versionCode versionName获取
     }
     output{
         renameOutput true
